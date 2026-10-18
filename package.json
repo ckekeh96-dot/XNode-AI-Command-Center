@@ -1,0 +1,24 @@
+{
+  "name": "xnode-alexa-command-center",
+  "version": "1.7.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@aws-crypto/sha256-js": "^5.2.0",
+    "@aws-sdk/client-bedrock": "^3.1152.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.800.0",
+    "@aws-sdk/client-lambda": "^3.1152.0",
+    "@aws-sdk/client-s3": "^3.1152.0",
+    "@aws-sdk/client-sts": "^3.1152.0",
+    "@aws-sdk/credential-provider-node": "^3.972.86",
+    "@aws-sdk/signature-v4": "^3.370.0",
+    "@google/generative-ai": "^0.24.1"
+  }
+}
