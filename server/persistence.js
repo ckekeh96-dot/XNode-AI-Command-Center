@@ -21,6 +21,8 @@ const DEFAULT_STATE={
   {id:'light-porch',name:'Porch Light',type:'light',status:'on',location:'front'},
   {id:'sensor-front',name:'Front Motion Sensor',type:'sensor',status:'active',location:'front'},
   {id:'sensor-back',name:'Back Motion Sensor',type:'sensor',status:'active',location:'back'},
+  {id:'sensor-left',name:'Left Side Motion Sensor',type:'sensor',status:'active',location:'left'},
+  {id:'sensor-right',name:'Right Side Motion Sensor',type:'sensor',status:'active',location:'right'},
   {id:'doorbell-cam',name:'Video Doorbell',type:'camera',status:'online',battery:94,location:'front'}
  ],
  preferences:{privacyMode:true}

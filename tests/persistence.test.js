@@ -17,7 +17,7 @@ test('state persists to disk after add_task',async()=>{
  const data=JSON.parse(readFileSync(STATE_FILE,'utf8'));
  const added=data.tasks.find(t=>t.title==='Persist test');
  assert.ok(added,'Persist test task should be in state');
- assert.equal(data.devices.length,10,'seeded devices present');
+ assert.equal(data.devices.length,12,'seeded devices present');
 });
 
 test('state survives module reload',async()=>{
