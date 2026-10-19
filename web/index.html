@@ -27,6 +27,12 @@
       <button class="nav-icon" data-section="back-security" title="Back Door">
         <span class="nav-icon-bg"></span><span class="nav-label">Back Door</span>
       </button>
+      <button class="nav-icon" data-section="left-security" title="Left Side">
+        <span class="nav-icon-bg">◁</span><span class="nav-label">Left Side</span>
+      </button>
+      <button class="nav-icon" data-section="right-security" title="Right Side">
+        <span class="nav-icon-bg">▷</span><span class="nav-label">Right Side</span>
+      </button>
       <button class="nav-icon" data-section="devices" title="Smart Hub">
         <span class="nav-icon-bg">⊞</span><span class="nav-label">Smart Hub</span>
       </button>
@@ -163,6 +169,56 @@
         <div id="back-events" class="event-list"></div>
       </section>
 
+      <!-- Left Side -->
+      <section class="card" id="left-security">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="card-icon">◁</span>
+            <div>
+              <h2>Left Side</h2>
+              <small>Synthetic events</small>
+            </div>
+          </div>
+          <span class="pill" id="left-camera-status">● Active</span>
+        </div>
+        <div class="security-visual side-visual">
+          <div class="visual-overlay"><span>SYNTHETIC CAMERA</span><span>LEFT</span></div>
+          <div class="visual-bottom">Simulated — not real footage</div>
+        </div>
+        <div class="event-simulators">
+          <button class="sec-btn" data-simulate="left_doorbell">Left Doorbell</button>
+          <button class="sec-btn" data-simulate="left_motion">Left Motion</button>
+          <button class="sec-btn" data-simulate="left_package">Left Package</button>
+          <button class="sec-btn" data-simulate="left_loitering">Left Loitering</button>
+        </div>
+        <div id="left-events" class="event-list"></div>
+      </section>
+
+      <!-- Right Side -->
+      <section class="card" id="right-security">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="card-icon">▷</span>
+            <div>
+              <h2>Right Side</h2>
+              <small>Synthetic events</small>
+            </div>
+          </div>
+          <span class="pill" id="right-camera-status">● Active</span>
+        </div>
+        <div class="security-visual side-visual right-visual">
+          <div class="visual-overlay"><span>SYNTHETIC CAMERA</span><span>RIGHT</span></div>
+          <div class="visual-bottom">Simulated — not real footage</div>
+        </div>
+        <div class="event-simulators">
+          <button class="sec-btn" data-simulate="right_doorbell">Right Doorbell</button>
+          <button class="sec-btn" data-simulate="right_motion">Right Motion</button>
+          <button class="sec-btn" data-simulate="right_package">Right Package</button>
+          <button class="sec-btn" data-simulate="right_loitering">Right Loitering</button>
+        </div>
+        <div id="right-events" class="event-list"></div>
+      </section>
+
       <!-- Smart Hub -->
       <section class="card card-wide" id="devices">
         <div class="card-header">
@@ -277,7 +333,7 @@
             <small>Days with activity</small>
           </div>
         </div>
-        <h3>Activity heatmap</h3>
+        <h3>Animated Activity heatmap</h3>
         <div id="activity-heatmap" class="heatmap"></div>
       </section>
 

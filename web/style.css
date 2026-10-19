@@ -1091,6 +1091,25 @@ pre {
   aspect-ratio: 1;
   border-radius: 2px;
   background: rgba(74, 158, 255, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.heatmap-cell.active {
+  animation: heatmap-pulse 2s ease-in-out infinite;
+}
+
+@keyframes heatmap-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.85; }
+}
+
+/* Side security visuals */
+.security-visual.side-visual {
+  background: linear-gradient(135deg, #1a2744, #0f1a2e);
+}
+
+.security-visual.side-visual.right-visual {
+  background: linear-gradient(135deg, #1a2744, #1a1a2e);
 }
 
 /* Activity list */
