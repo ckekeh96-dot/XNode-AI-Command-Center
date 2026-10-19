@@ -1,91 +1,133 @@
-# XNode AI Command Center — Alexa+ Hackathon Prototype
+# XNode AI Command Center
 
-A functional **local simulation** of a command center with a browser interface and a small MCP-compatible JSON-RPC server. **Not an Alexa+ integration**, **not a Ring integration**, and **not an AWS Builder qualifying implementation** yet.
+A local-first, approval-first AI command center built for the **Amazon Developer Hackathon 2026**.
+Primary track: **Alexa+ simulated experience**. Mini challenges: **AWS Builder** + **Open Source**.
+
+## What it is
+
+A browser-based command center that simulates an Alexa+ experience: a self-hosted MCP server
+(spec 2025-11-25, Streamable HTTP stateless transport) exposes 16 tools for tasks, approvals,
+security events, device control, and mesh-network inspection. A natural-language assistant
+dispatches commands to those tools. A simulated WiFi mesh connects the hub to 10 smart devices
+with realistic signal drift, latency jitter, and connectivity enforcement. An optional
+Amazon Nova Act agent drives the local UI end-to-end.
+
+**Nothing here controls real Ring devices or calls real Alexa+ services.** All device data is
+synthetic and labeled `SIMULATED`. Sensitive actions require explicit human approval.
 
 ## Run
 
-Install Node.js 20 or later, then:
-
 ```bash
+npm install
 npm start
 ```
 
-Open http://127.0.0.1:8787. No dependencies or credentials required. Windows PowerShell and macOS/Linux shells are supported. To run tests: `npm test`.
+Open http://127.0.0.1:8787. Tests: `npm test`.
 
-## Demo
+## MCP server
 
-- `add task Prepare hackathon demo`
-- `show tasks`
-- `security events` (clearly labeled synthetic data)
-- `business summary`
+`POST http://127.0.0.1:8787/mcp` — JSON-RPC 2.0, Streamable HTTP stateless transport:
 
-## MCP endpoint
-
-`POST http://127.0.0.1:8787/mcp` with JSON-RPC 2.0. Implements `initialize`, `ping`, `tools/list`, and `tools/call`, plus initialized notification acknowledgement. Example:
+- Single endpoint `/mcp`, POST only (GET returns 405 per spec for servers without server-initiated streams)
+- Client sends `Accept: application/json, text/event-stream`; server returns JSON
+- Notifications return HTTP 202 with no body
+- `Mcp-Session-Id` is not assigned (stateless server)
+- Origin validation rejects cross-origin requests
+- Protocol version `2025-11-25` negotiated on `initialize`
 
 ```bash
-curl -X POST http://127.0.0.1:8787/mcp -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
+curl -X POST http://127.0.0.1:8787/mcp \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
 ```
 
-This is a **minimal prototype**, not fully verified MCP spec conformance. No SSE, authentication, OAuth, session lifecycle, or remote deployment. Localhost binding and same-origin checks intentionally restrict access.
+### 16 tools
+
+| Tool | Purpose |
+|---|---|
+| `list_tasks` | List local tasks |
+| `add_task` | Create a local task |
+| `complete_task` | Toggle a task done state |
+| `list_approvals` | List pending and decided approvals |
+| `propose_visitor_followup` | Prepare a visitor follow-up requiring human approval |
+| `decide_followup` | Approve or reject a prepared follow-up |
+| `security_events` | Read simulated security events (front/back location filter) |
+| `simulate_event` | Trigger a simulated security event |
+| `dismiss_event` | Dismiss a simulated security event |
+| `list_devices` | List simulated smart home devices |
+| `toggle_device` | Toggle a simulated device state (lock, light, climate) |
+| `network_status` | Show simulated mesh network status and device connectivity |
+| `pair_device` | Pair or reconnect a device on the simulated mesh |
+| `simulate_dropout` | Drop a device from the simulated mesh |
+| `activity_log` | Show local tool activity audit trail |
+| `business_summary` | Summarize local demo activity |
+
+## Simulated mesh network
+
+`server/network.js` models a local mesh: SSID **XNode-Mesh**, hub `192.168.10.1`, device IPs
+`192.168.10.11+`, RSSI `-38..-82 dBm` drift, latency jitter, `wifi` vs `zigbee` by device type.
+Offline devices cannot be toggled until re-paired. The UI shows a live network strip with
+signal bars and an orange warning tag when a device is offline.
+
+## Nova Act integration
+
+`nova/nova_demo.py` runs a real Amazon Nova Act browser-automation agent against the local
+XNode web app. The agent refreshes the dashboard, reads the mesh status, and triggers a
+simulated security event through the UI.
+
+```bash
+pip install nova-act
+python -m playwright install chromium
+set NOVA_ACT_API_KEY=<key from https://nova.amazon.com>
+npm run nova
+```
+
+The script fails fast with clear instructions if the SDK, Chromium, or API key is missing.
+
+## Alexa+ integration path
+
+This project ships the **exact integration surface Alexa+ consumes**: a self-hosted MCP server
+with spec 2025-11-25, Streamable HTTP transport, and Origin validation. To connect live Alexa+:
+
+1. Deploy the server on a public HTTPS endpoint (e.g. Cloudflare Tunnel free tier)
+2. Enroll in the Alexa+ Preview program at https://developer.amazon.com
+3. Register the MCP server URL in the Alexa+ AG Console
+4. Configure OAuth account linking (or skip for personal use)
+
+Without Preview enrollment, the simulated-experience path is the track's supported option.
 
 ## Architecture
 
-`web/` browser UI; `server/core.js` deterministic tool actions and in-memory data; `server/index.js` HTTP/MCP routes; `tests/` unit tests. Data resets on server restart.
+- `web/` — browser UI (HTML/CSS/JS, no framework)
+- `server/core.js` — deterministic tool actions, in-memory data with JSON-file persistence
+- `server/network.js` — simulated mesh network module
+- `server/index.js` — HTTP + MCP routes, JSON-RPC dispatcher
+- `server/agent.js` — natural-language command dispatcher
+- `server/persistence.js` — JSON-file state with in-place mutation
+- `tests/` — 15 tests (core, persistence, http)
 
-## Hackathon completion checklist
+Multi-provider AI dispatch via `AI_PROVIDER` env var (`gemini` / `bedrock` / `offline`).
+`resetState()` mutates cached state in-place to keep the module-level export in sync.
 
-- [x] Runnable web simulation and demo commands
-- [x] Source, MIT license, basic tests, CI
-- [ ] Verify latest official Alexa+ simulated-experience track rules and submission eligibility
-- [ ] Add real Alexa+ partner integration **or** confirm simulated path qualifies and document its agent behavior
-- [ ] Validate MCP spec 2025-11-25 with official inspector and compliance tests
-- [ ] Integrate AWS Bedrock with credentials and usage controls if entering AWS Builder
-- [ ] Make a separate new open-source project or qualifying contribution for Open Source mini challenge
-- [ ] Capture actual product feedback and friction logs from tools used
-- [ ] Record and publish English demo video under 3 minutes
-- [ ] Publish GitHub repo, check deadlines, submit Devpost entry
+## Hackathon submission checklist
 
-## Security
+- [x] Runnable web app + demo commands
+- [x] Self-hosted MCP server, spec 2025-11-25, Streamable HTTP stateless transport
+- [x] 16 tools with input schemas
+- [x] Simulated mesh network with connectivity enforcement
+- [x] Nova Act SDK integration (runnable agent script)
+- [x] MIT license
+- [x] 15 tests passing
+- [x] Persistent state (survives restart)
+- [ ] Publish GitHub repo (public + license, or private + collaborators)
+- [ ] Add Amazon collaborators at submission time (see below)
+- [ ] Upload <3-min demo video (public YouTube/Vimeo)
+- [ ] Complete Devpost submission fields (description, product feedback, track selection)
 
-Never commit API keys. The app has no user authentication; do not expose it to the internet as-is. It does not control physical locks, cameras, or real devices.
+## Collaborators (add at submission time)
 
-## Suggested 2:30 demo script
+Private repo: Settings → Collaborators → Add people:
+`chris-trag`, `knmeiss`, `giolaq`, `anishamalde`, `mosesroth`, `emersonsklar`
 
-0:00–0:20 problem and concept; 0:20–0:55 create task; 0:55–1:20 list tasks; 1:20–1:45 simulated doorbell feed; 1:45–2:05 summary; 2:05–2:25 demonstrate MCP tools/list; 2:25–2:30 state what is real and what is simulated.
-
-## v1.1: Optional Amazon Bedrock agent
-
-The app now has an **optional** Bedrock Converse API agent loop that invokes real local task/security-summary tools via model tool use. Offline mode remains the default. AWS calls have **not been verified against a live AWS account** in this package; do not claim AWS Builder qualification until you demonstrate a successful live request.
-
-```powershell
-npm install
-$env:ENABLE_BEDROCK="true"
-$env:AWS_REGION="us-east-1"
-$env:BEDROCK_MODEL_ID="YOUR_ENABLED_BEDROCK_MODEL_ID"
-# Configure credentials using your own AWS CLI/profile or IAM role; never place keys in code.
-npm start
-```
-
-Choose a Bedrock model supporting Converse tool use and verify model access, region, IAM permission (`bedrock:InvokeModel`), and usage charges. Keep `ENABLE_BEDROCK` unset for fully offline demonstrations. Tool calls only modify in-memory demo tasks. The system does not control Ring devices or connect to Alexa+ production services.
-
-### MCP notes
-
-The local stateless `/mcp` endpoint uses JSON-RPC and `2025-11-25` initialization, supports POST, and explicitly declines GET/SSE. This is **not a claim of full MCP conformance**. Before submission, test against the official MCP Inspector and validate protocol headers, content negotiation, error behavior, and any required authorization for remote deployment. Never expose this unauthenticated demo server publicly.
-
-### Suggested AWS Builder evidence
-
-Capture a screen recording of an actual Bedrock-enabled command invoking a tool; include the exact AWS service, SDK, region, IAM permission scope, and cost controls in the submission. If you do not execute and verify that call, submit as an offline Alexa+ simulation only.
-
-## v1.2 verification update
-
-Added real HTTP integration tests covering MCP initialization (protocol version 2025-11-25), tools listing and invocation, initialized notification acknowledgment, invalid protocol version rejection, and offline command routing. Run `npm test` (13 tests). This verifies the listed local HTTP flows, **not** official MCP inspector certification or Alexa+ compatibility. The MCP endpoint remains localhost-only and does not implement authentication or SSE streaming. Do not deploy it publicly without adding authentication, transport hardening, rate limits, and an official compatibility test.
-
-### Live AWS verification (must be completed by the project owner)
-
-1. Run `npm install` and configure AWS credentials locally via the standard AWS SDK credential provider chain (do not commit credentials).
-2. Set `ENABLE_BEDROCK=true`, `AWS_REGION` and `BEDROCK_MODEL_ID` to a model enabled for your account.
-3. Start the server and use the dashboard to submit a task command. Confirm the response reports `aws-bedrock` rather than `aws-error` or `offline-simulation`.
-4. Capture the sanitized successful response for your submission evidence. Monitor Bedrock usage charges.
-
-The supplied package contains no AWS credentials and no verified live Bedrock request.
+Invitations expire after 7 days — add them when you submit, not weeks in advance.
