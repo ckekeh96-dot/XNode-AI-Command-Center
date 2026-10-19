@@ -28,10 +28,7 @@
         <span class="nav-icon-bg"></span><span class="nav-label">Back Door</span>
       </button>
       <button class="nav-icon" data-section="left-security" title="Left Side">
-        <span class="nav-icon-bg">◁</span><span class="nav-label">Left Side</span>
-      </button>
-      <button class="nav-icon" data-section="right-security" title="Right Side">
-        <span class="nav-icon-bg">▷</span><span class="nav-label">Right Side</span>
+        <span class="nav-icon-bg">◁</span><span class="nav-label">Side View</span>
       </button>
       <button class="nav-icon" data-section="devices" title="Smart Hub">
         <span class="nav-icon-bg">⊞</span><span class="nav-label">Smart Hub</span>
@@ -173,50 +170,29 @@
       <section class="card" id="left-security">
         <div class="card-header">
           <div class="card-title">
-            <span class="card-icon">◁</span>
+            <span class="card-icon" id="side-icon">◁</span>
             <div>
-              <h2>Left Side</h2>
+              <h2 id="side-title">Left Side</h2>
               <small>Synthetic events</small>
             </div>
           </div>
-          <span class="pill" id="left-camera-status">● Active</span>
+          <div class="side-toggle">
+            <button class="side-btn active" data-side="left">◁ Left</button>
+            <button class="side-btn" data-side="right">▷ Right</button>
+          </div>
+          <span class="pill" id="side-camera-status">● Active</span>
         </div>
-        <div class="security-visual side-visual">
-          <div class="visual-overlay"><span>SYNTHETIC CAMERA</span><span>LEFT</span></div>
+        <div class="security-visual side-visual" id="side-visual">
+          <div class="visual-overlay"><span>SYNTHETIC CAMERA</span><span id="side-label">LEFT</span></div>
           <div class="visual-bottom">Simulated — not real footage</div>
         </div>
-        <div class="event-simulators">
+        <div class="event-simulators" id="side-simulators">
           <button class="sec-btn" data-simulate="left_doorbell">Left Doorbell</button>
           <button class="sec-btn" data-simulate="left_motion">Left Motion</button>
           <button class="sec-btn" data-simulate="left_package">Left Package</button>
           <button class="sec-btn" data-simulate="left_loitering">Left Loitering</button>
         </div>
-        <div id="left-events" class="event-list"></div>
-      </section>
-
-      <!-- Right Side -->
-      <section class="card" id="right-security">
-        <div class="card-header">
-          <div class="card-title">
-            <span class="card-icon">▷</span>
-            <div>
-              <h2>Right Side</h2>
-              <small>Synthetic events</small>
-            </div>
-          </div>
-          <span class="pill" id="right-camera-status">● Active</span>
-        </div>
-        <div class="security-visual side-visual right-visual">
-          <div class="visual-overlay"><span>SYNTHETIC CAMERA</span><span>RIGHT</span></div>
-          <div class="visual-bottom">Simulated — not real footage</div>
-        </div>
-        <div class="event-simulators">
-          <button class="sec-btn" data-simulate="right_doorbell">Right Doorbell</button>
-          <button class="sec-btn" data-simulate="right_motion">Right Motion</button>
-          <button class="sec-btn" data-simulate="right_package">Right Package</button>
-          <button class="sec-btn" data-simulate="right_loitering">Right Loitering</button>
-        </div>
-        <div id="right-events" class="event-list"></div>
+        <div id="side-events" class="event-list"></div>
       </section>
 
       <!-- Smart Hub -->
@@ -318,41 +294,64 @@
         <div id="workflow-timeline" class="workflow-timeline" aria-live="polite"></div>
       </section>
 
-      <!-- Analytics -->
-      <section class="card card-wide" id="analytics">
+      <!-- System Status -->
+      <section class="card" id="system-status">
         <div class="card-header">
           <div class="card-title">
-            <span class="card-icon">▤</span>
+            <span class="card-icon">◉</span>
             <div>
-              <h2>Analytics</h2>
-              <small>Last 7 days</small>
+              <h2>System Status</h2>
+              <small>Real-time overview</small>
             </div>
           </div>
         </div>
-        <div class="analytics-grid">
-          <div class="analytics-card">
-            <span class="analytics-label">Completion rate</span>
-            <strong id="analytics-completion-rate">0%</strong>
-            <small id="analytics-completion-detail">0 of 0 tasks</small>
+        <div class="status-grid">
+          <div class="status-item">
+            <span class="status-label">Front Events</span>
+            <strong id="status-front-events">0</strong>
           </div>
-          <div class="analytics-card">
-            <span class="analytics-label">Avg approval time</span>
-            <strong id="analytics-approval-time">—</strong>
-            <small>Proposal to decision</small>
+          <div class="status-item">
+            <span class="status-label">Back Events</span>
+            <strong id="status-back-events">0</strong>
           </div>
-          <div class="analytics-card">
-            <span class="analytics-label">Total actions</span>
-            <strong id="analytics-total-actions">0</strong>
-            <small>Tool invocations</small>
+          <div class="status-item">
+            <span class="status-label">Side Events</span>
+            <strong id="status-side-events">0</strong>
           </div>
-          <div class="analytics-card">
-            <span class="analytics-label">Active days</span>
-            <strong id="analytics-active-days">0</strong>
-            <small>Days with activity</small>
+          <div class="status-item">
+            <span class="status-label">Devices Online</span>
+            <strong id="status-devices-online">0/0</strong>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Tasks Done</span>
+            <strong id="status-tasks-done">0/0</strong>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Pending Approvals</span>
+            <strong id="status-pending-approvals">0</strong>
           </div>
         </div>
-        <h3>Animated Activity heatmap</h3>
-        <div id="activity-heatmap" class="heatmap"></div>
+      </section>
+
+      <!-- Quick Actions -->
+      <section class="card" id="quick-actions">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="card-icon">⚡</span>
+            <div>
+              <h2>Quick Actions</h2>
+              <small>Common commands</small>
+            </div>
+          </div>
+        </div>
+        <div class="quick-actions-grid">
+          <button class="action-btn" data-command="simulate doorbell">🔔 Simulate Doorbell</button>
+          <button class="action-btn" data-command="show tasks">📋 Show Tasks</button>
+          <button class="action-btn" data-command="security events">🛡 Security Events</button>
+          <button class="action-btn" data-command="business summary">📊 Business Summary</button>
+          <button class="action-btn" data-command="devices">📱 Smart Devices</button>
+          <button class="action-btn" data-command="activity log">📜 Activity Log</button>
+        </div>
       </section>
 
       <!-- Activity Log -->
